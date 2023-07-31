@@ -1,6 +1,9 @@
 Rails.application.routes.draw do
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+  get '/users', to: 'users#index', :defaults => { :format => 'json' }
+  get '/users/:id', to: 'users#get_by_id', :defaults => { :format => 'json' }
+  post '/users', to: 'users#create', :defaults => { :format => 'json' }
+  put '/users/:id', to: 'users#update', :defaults => { :format => 'json' }
+  delete '/users/:id', to: 'users#delete', :defaults => { :format => 'json' }
 
-  # Defines the root path route ("/")
-  # root "articles#index"
+  resources :posts, only: %i[create update delete], defaults: { :format => 'json' }
 end
