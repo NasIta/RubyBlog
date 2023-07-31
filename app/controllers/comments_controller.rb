@@ -22,7 +22,8 @@ class CommentsController < ApplicationController
 
     respond_to do |format|
       format.json { render :json => {
-        comment: @comment
+        comment: @comment,
+        errors: @comment.errors
       } }
     end
   end
@@ -39,7 +40,7 @@ class CommentsController < ApplicationController
     respond_to do |format|
       format.json { render :json => {
         success: @comment.errors.count == 0,
-        errors: @comment.errors.full_messages
+        errors: @comment.errors
       } }
     end
   end

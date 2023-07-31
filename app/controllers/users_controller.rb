@@ -18,7 +18,7 @@ class UsersController < ApplicationController
     total_users = users_query.count
     total_pages = (total_users.to_f / items_per_page).ceil
 
-    users = users_query.offset(offset).limit(items_per_page).all
+    @users = users_query.offset(offset).limit(items_per_page).all
 
     respond_to do |format|
       format.json { render :json => {
@@ -27,19 +27,19 @@ class UsersController < ApplicationController
         items_per_page: items_per_page,
         total_users: total_users,
         total_pages: total_pages,
-        users: users
+        users: @users
       } }
     end
   end
 
   def get_by_id
-    user = User.includes(posts: :comments).find_by(id: params[:id])
+    @user = User.includes(posts: :comments).find_by(id: params[:id])
 
-    if user == nil
+    if @user == nil
       raise ActionController::RoutingError.new('Not Found')
     end
 
-    user = user.as_json(
+    @user = @user.as_json(
       include: {
         posts: {
           include: :comments
@@ -49,7 +49,7 @@ class UsersController < ApplicationController
 
     respond_to do |format|
       format.json { render :json => {
-        user: user
+        user: @user
       } }
     end
   end
@@ -57,17 +57,18 @@ class UsersController < ApplicationController
   def create
     post_data = JSON.parse(request.raw_post)
 
-    user = User.create(
+    @user = User.create(
       name: post_data['name'],
       registered_at: Time.now,
       posted: 0
     )
 
-    user.save
+    @user.save
 
     respond_to do |format|
       format.json { render :json => {
-        user: user
+        user: @user,
+        errors: @user.errors
       } }
     end
   end
@@ -75,42 +76,43 @@ class UsersController < ApplicationController
   def update
     post_data = JSON.parse(request.raw_post)
 
-    user = User.find_by(id: params[:id])
+    @user = User.find_by(id: params[:id])
 
-    if user == nil
+    if @user == nil
       raise ActionController::RoutingError.new('Not Found')
     end
 
-    user.name = post_data['name']
-    user.save
+    @user.name = post_data['name']
+    @user.save
 
     respond_to do |format|
       format.json { render :json => {
-        user: user
+        user: @user,
+        errors: @user.errors
       } }
     end
   end
 
   def delete
-    user = User.find_by(id: params[:id])
+    @user = User.find_by(id: params[:id])
 
-    if user == nil
+    if @user == nil
       raise ActionController::RoutingError.new('Not Found')
     end
 
     message = 'exists, delete them first'
-    if user.posts.count > 0
-      user.errors.add(:posts, message)
+    if @user.posts.count > 0
+      @user.errors.add(:posts, message)
     end
 
-    if user.errors.count == 0
-      user.delete
+    if @user.errors.count == 0
+      @user.delete
     end
 
     respond_to do |format|
       format.json { render :json => {
-        success: user.errors.count == 0,
-        errors: user.errors.full_messages
+        success: @user.errors.count == 0,
+        errors: @user.errors.full_messages
       } }
     end
   end

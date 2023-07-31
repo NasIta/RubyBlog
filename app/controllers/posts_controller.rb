@@ -5,26 +5,27 @@ class PostsController < ApplicationController
     post_data = JSON.parse(request.raw_post)
 
     user_id = post_data['user_id']
-    user = User.find_by(id: user_id)
+    @user = User.find_by(id: user_id)
 
-    if user == nil
+    if @user == nil
       raise ActionController::RoutingError.new('Not Found')
     end
 
-    post = Post.create(
+    @post = Post.create(
       title: post_data['title'],
       text: post_data['text'],
       user_id: user_id,
     )
 
-    post.save
+    @post.save
 
-    user.posted += 1
-    user.save
+    @user.posted += 1
+    @user.save
 
     respond_to do |format|
       format.json { render :json => {
-        post: post
+        post: @post,
+        errors: @post.errors
       } }
     end
   end
@@ -32,19 +33,20 @@ class PostsController < ApplicationController
   def update
     post_data = JSON.parse(request.raw_post)
 
-    post = Post.find_by(id: params[:id])
+    @post = Post.find_by(id: params[:id])
 
-    if post == nil
+    if @post == nil
       raise ActionController::RoutingError.new('Post Not Found')
     end
 
-    post.title = post_data['title']
-    post.text = post_data['text']
-    post.save
+    @post.title = post_data['title']
+    @post.text = post_data['text']
+    @post.save
 
     respond_to do |format|
       format.json { render :json => {
-        post: post
+        post: @post,
+        errors: @post.errors
       } }
     end
   end
