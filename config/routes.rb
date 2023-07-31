@@ -5,5 +5,7 @@ Rails.application.routes.draw do
   put '/users/:id', to: 'users#update', :defaults => { :format => 'json' }
   delete '/users/:id', to: 'users#delete', :defaults => { :format => 'json' }
 
-  resources :posts, only: %i[create update delete], defaults: { :format => 'json' }
+  resources :posts, only: %i[create update destroy], defaults: { :format => 'json' }
+  resources :comments, only: %i[create destroy], defaults: { :format => 'json' }
+
 end
