@@ -2,17 +2,12 @@ class PostsController < ApplicationController
   protect_from_forgery
 
   def create
-    @post = Post.new(post_create_params)
-
-    @post.save
-
-    @user = User.find_by!(id: @post.user_id)
-    @user.posted += 1
-    @user.save
+    posts_service = PostsService.new
+    @post = posts_service.create(post_create_params)
 
     render json: {
       post: @post,
-      errors: @post.errors.merge!(@user.errors)
+      errors: @post.errors
     }
   end
 
@@ -35,19 +30,12 @@ class PostsController < ApplicationController
   end
 
   def destroy
-    @post = Post.find_by!(id: params[:id])
-
-    @post.delete_children
-    @post.delete
-
-    @user = User.find_by!(id: @post.user_id)
-
-    @user.posted -= 1
-    @user.save
+    posts_service = PostsService.new
+    @post = posts_service.destroy_by_id(params[:id])
 
     render json: {
       success: @post.errors.count == 0,
-      errors: @post.errors.merge!(@user.errors)
+      errors: @post.errors
     }
   end
 end
