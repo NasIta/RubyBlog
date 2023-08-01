@@ -2,46 +2,27 @@ class CommentsController < ApplicationController
   protect_from_forgery
 
   def create
-    post_data = JSON.parse(request.raw_post)
+    @comment = Comment.new(comment_create_params)
+    @comment.save
 
-    user_id = post_data['user_id']
-    @user = User.find_by(id: user_id)
+    render json: {
+      comment: @comment,
+      errors: @comment.errors
+    }
+  end
 
-    if @user == nil
-      raise ActionController::RoutingError.new('User Not Found')
-    end
-
-    post_id = post_data['post_id']
-    @post = Post.find_by(id: post_id)
-
-    if @post == nil
-      raise ActionController::RoutingError.new('Post Not Found')
-    end
-
-    @comment = Comment.create(post_data)
-
-    respond_to do |format|
-      format.json { render :json => {
-        comment: @comment,
-        errors: @comment.errors
-      } }
-    end
+  def comment_create_params
+    params.require(:comment).permit(:post_id, :user_id, :rate, :text)
   end
 
   def destroy
-    @comment = Comment.find_by(id: params[:id])
-
-    if @comment == nil
-      raise ActionController::RoutingError.new('Comment Not Found')
-    end
+    @comment = Comment.find_by!(id: params[:id])
 
     @comment.delete
 
-    respond_to do |format|
-      format.json { render :json => {
-        success: @comment.errors.count == 0,
-        errors: @comment.errors
-      } }
-    end
+    render json: {
+      success: @comment.errors.count == 0,
+      errors: @comment.errors
+    }
   end
 end
